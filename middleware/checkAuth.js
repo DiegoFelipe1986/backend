@@ -9,13 +9,20 @@ const checkAuth = async(req, res, next) => {
         try {
             token = req.headers.authorization.split(' ')[1];
             const decoded = jwt.verify(token, process.env.JWT_SECRET)
-            console.log(decoded)
-            req.user = await User.findById(decode.id);
+            req.user = await User.findById(decoded.id).select(
+                "-password -comfirm -token -createdAt -updatedAt -__v -confirmed"
+            );
             console.log(req.user)
         } catch (error) {
             return res.status(404).json({msg: "An error has ocurred"})
         }
     }
+
+    if (!token){
+        const error = new Error ('Token not valid');
+        return res.status(401).json({msg: error.message});
+    }
+
     next();
 }
 
