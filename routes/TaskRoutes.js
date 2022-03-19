@@ -10,7 +10,7 @@ import {
 
 import checkAuth from '../middleware/checkAuth.js'
 
-const router = express.Router
+const router = express.Router();
 
 router.post('/', checkAuth, addTask);
 router.route('/:id')
