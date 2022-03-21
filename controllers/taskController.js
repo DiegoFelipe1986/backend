@@ -5,7 +5,6 @@ const addTask = async (req, res) => {
     const {project} = req.body;
 
     const existProject = await Project.findById(project);
-
     if(!existProject){
         const error = new Error('Project not existing');
         return res.status(404).json({msg: error.message})
@@ -18,6 +17,8 @@ const addTask = async (req, res) => {
 
     try {
         const taskStored = await Task.create(req.body);
+        existProject.tasks.push(taskStored._id);
+        await existProject.save();
         res.json(taskStored);
     } catch (error) {
         console.log(error)
@@ -84,7 +85,7 @@ const deleteTask = async (req, res) => {
 
     try {
         await task.deleteOne()
-        res.json({msg: `Task was eliminated`})
+        res.json({msg: `Task was deleted`})
     } catch (error) {
         console.log(error)
     }
