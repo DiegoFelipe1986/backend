@@ -84,13 +84,35 @@ const deleteTask = async (req, res) => {
     }
 
     try {
-        await task.deleteOne()
+        await task.deleteOne();
+
         res.json({msg: `Task was deleted`})
     } catch (error) {
         console.log(error)
     }
 };
-const changeState = async (req, res) => {};
+const changeState = async (req, res) => {
+    const {id} = req.params;
+
+    const task = await Task.findById(id).populate('project');
+
+    if(!task){
+        const error = new Error(`Task not found`);
+        return res.status(404).json({msg: error.message})
+    }
+
+    if(task.project.creator.toString() !== req.user._id.toString() &&
+    !task.project.collaborator
+    .some(collaborator => collaborator._id.toString() === req.user._id.toString())
+    ){
+        const error = new Error(`Action not allow`);
+        return res.status(403).json({msg: error.message})
+    }
+    task.state = !task.state;
+    task.complete = req.user._id;
+    await task.save();
+    res.json(task)
+};
 
 
 export {
